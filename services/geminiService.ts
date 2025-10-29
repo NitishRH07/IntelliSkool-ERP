@@ -1,19 +1,11 @@
+/// <reference types="vite/client" />
+
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { Quiz } from '../types';
 
-// FIX: Initialize Gemini AI Client with proper environment variable handling
-// Declare the global property for Vite environment variables
-declare global {
-    interface Window {
-        VITE_GEMINI_API_KEY?: string;
-    }
-}
-
-// For TypeScript to recognize import.meta.env
-declare const __VITE_GEMINI_API_KEY__: string | undefined;
-
-// Use Vite environment variable with fallback to process.env
-const apiKey = __VITE_GEMINI_API_KEY__ || process.env.GEMINI_API_KEY;
+// Initialize Gemini AI Client with proper environment variable handling for Vite
+// In Vite, environment variables must be prefixed with VITE_ to be exposed to client-side code
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
 const ai = new GoogleGenAI({ apiKey });
 
@@ -206,8 +198,8 @@ export const generateVideo = async (
     onUpdate: (status: string) => void
 ): Promise<{ uri?: string; error?: string }> => {
     try {
-        // FIX: Create a new GoogleGenAI instance right before making an API call to ensure it always uses the most up-to-date API key from the dialog.
-        const videoApiKey = __VITE_GEMINI_API_KEY__ || process.env.GEMINI_API_KEY;
+        // Create a new GoogleGenAI instance right before making an API call to ensure it always uses the most up-to-date API key from the dialog.
+        const videoApiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
         const videoAI = new GoogleGenAI({ apiKey: videoApiKey });
         onUpdate('Starting video generation...');
         let operation = await videoAI.models.generateVideos({
