@@ -1,9 +1,21 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { Quiz } from '../types';
 
-// FIX: Initialize Gemini AI Client
-// Always use `new GoogleGenAI({apiKey: process.env.API_KEY});`.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// FIX: Initialize Gemini AI Client with proper environment variable handling
+// Declare the global property for Vite environment variables
+declare global {
+    interface Window {
+        VITE_GEMINI_API_KEY?: string;
+    }
+}
+
+// For TypeScript to recognize import.meta.env
+declare const __VITE_GEMINI_API_KEY__: string | undefined;
+
+// Use Vite environment variable with fallback to process.env
+const apiKey = __VITE_GEMINI_API_KEY__ || process.env.GEMINI_API_KEY;
+
+const ai = new GoogleGenAI({ apiKey });
 
 const getModel = (taskType: string) => {
     switch (taskType) {
@@ -195,7 +207,8 @@ export const generateVideo = async (
 ): Promise<{ uri?: string; error?: string }> => {
     try {
         // FIX: Create a new GoogleGenAI instance right before making an API call to ensure it always uses the most up-to-date API key from the dialog.
-        const videoAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const videoApiKey = __VITE_GEMINI_API_KEY__ || process.env.GEMINI_API_KEY;
+        const videoAI = new GoogleGenAI({ apiKey: videoApiKey });
         onUpdate('Starting video generation...');
         let operation = await videoAI.models.generateVideos({
             model: getModel('video'),
@@ -219,7 +232,7 @@ export const generateVideo = async (
         }
 
         // The response.body contains the MP4 bytes. You must append an API key when fetching from the download link.
-        const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+        const response = await fetch(`${downloadLink}&key=${videoApiKey}`);
         if (!response.ok) {
             return { error: `Failed to fetch video file (status: ${response.status})` };
         }
