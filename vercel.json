@@ -2,6 +2,14 @@
   "version": 2,
   "routes": [
     {
+      "src": "/health.txt",
+      "dest": "/health.txt"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
