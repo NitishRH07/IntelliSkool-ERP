@@ -7,7 +7,12 @@ import { Quiz } from '../types';
 // In Vite, environment variables must be prefixed with VITE_ to be exposed to client-side code
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
-const ai = new GoogleGenAI({ apiKey });
+// Add a check for missing API key
+if (!apiKey) {
+    console.warn("Gemini API key is missing. AI features will not work.");
+}
+
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const getModel = (taskType: string) => {
     switch (taskType) {
@@ -25,6 +30,12 @@ const getModel = (taskType: string) => {
 };
 
 const simpleTextRequest = async (prompt: string, taskType: 'simple' | 'complex' = 'simple'): Promise<string> => {
+    // Check if AI client is initialized
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return "AI features are currently unavailable. Please contact the administrator.";
+    }
+    
     try {
         const response = await ai.models.generateContent({
             model: getModel(taskType),
@@ -38,6 +49,12 @@ const simpleTextRequest = async (prompt: string, taskType: 'simple' | 'complex' 
 };
 
 export const generateQuestionPaper = async (config: any): Promise<string> => {
+    // Check if AI client is initialized
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return "AI features are currently unavailable. Please contact the administrator.";
+    }
+    
     // Create a detailed structure description
     let structureDescription = "";
     if (config.questionStructure) {
@@ -72,6 +89,12 @@ export const generateQuestionPaper = async (config: any): Promise<string> => {
 };
 
 export const generateQuizFromNotes = async (notes: string, subject: string, numQuestions: number): Promise<Quiz | null> => {
+    // Check if AI client is initialized
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return null;
+    }
+    
     const prompt = `Based on the following notes about ${subject}, generate a quiz with ${numQuestions} multiple-choice questions. Each question must have 4 options and a single correct answer.
 
     Notes:
@@ -122,18 +145,65 @@ export const generateQuizFromNotes = async (notes: string, subject: string, numQ
 };
 
 
-export const getAIAnalysis = (prompt: string) => simpleTextRequest(prompt);
-export const getChatbotResponse = (input: string) => simpleTextRequest(`You are a helpful AI study assistant for a student. Provide a clear, concise, and encouraging answer to the following question: "${input}"`);
-export const generateReportRemarks = (studentData: string) => simpleTextRequest(`Generate personalized, constructive report card remarks for a student with the following data. Be encouraging and provide actionable advice. Data: ${studentData}`);
-export const generateLessonPlan = (inputs: any) => simpleTextRequest(`Create a detailed weekly lesson plan for a ${inputs.grade} ${inputs.subject} class.
+export const getAIAnalysis = (prompt: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(prompt);
+};
+
+export const getChatbotResponse = (input: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`You are a helpful AI study assistant for a student. Provide a clear, concise, and encouraging answer to the following question: "${input}"`);
+};
+
+export const generateReportRemarks = (studentData: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Generate personalized, constructive report card remarks for a student with the following data. Be encouraging and provide actionable advice. Data: ${studentData}`);
+};
+
+export const generateLessonPlan = (inputs: any) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Create a detailed weekly lesson plan for a ${inputs.grade} ${inputs.subject} class.
     - Current Module: ${inputs.week}
     - Last Week's Recap: ${inputs.lastWeekTopics}
     - Student Performance Context: ${inputs.performance}
     
     The plan should include day-by-day objectives, activities, and assessment methods. It should address the performance context (e.g., include revision for difficult topics).`, 'complex');
-export const generateTimetable = (constraints: string) => simpleTextRequest(`Generate a valid weekly timetable based on these constraints:\n${constraints}`, 'complex');
-export const getDropoutRiskAnalysis = (studentData: string) => simpleTextRequest(`Analyze the following student data to assess their dropout risk. Provide a risk level (Low, Medium, High), a justification for the assessment, and a list of 2-3 recommended intervention strategies for the school to implement.\n\nData:\n${studentData}`, 'complex');
-export const generateAdminReport = () => simpleTextRequest(`Generate a comprehensive weekly institutional report for the school administration. Use the following mock data:
+};
+
+export const generateTimetable = (constraints: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Generate a valid weekly timetable based on these constraints:\n${constraints}`, 'complex');
+};
+
+export const getDropoutRiskAnalysis = (studentData: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Analyze the following student data to assess their dropout risk. Provide a risk level (Low, Medium, High), a justification for the assessment, and a list of 2-3 recommended intervention strategies for the school to implement.\n\nData:\n${studentData}`, 'complex');
+};
+
+export const generateAdminReport = () => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Generate a comprehensive weekly institutional report for the school administration. Use the following mock data:
 - Overall Attendance: 91% (down 2% from last week)
 - Top Performing Class: Grade 10 (95% average score)
 - Lowest Performing Class: Grade 8 (72% average score, especially in Physics)
@@ -147,7 +217,14 @@ The report should have sections for:
 3.  Attendance Trends
 4.  Administrative & Financial Update
 5.  Key Concerns & AI-Powered Recommendations`, 'complex');
-export const generateFeedbackForAnswer = (question: string, answer: string, criteria: string) => simpleTextRequest(`
+};
+
+export const generateFeedbackForAnswer = (question: string, answer: string, criteria: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`
     Grade the student's answer based on the provided criteria and give constructive feedback.
     
     Question: ${question}
@@ -159,14 +236,55 @@ export const generateFeedbackForAnswer = (question: string, answer: string, crit
     2.  A final score.
     3.  Specific, helpful feedback explaining what was good and what could be improved.
 `);
-export const summarizeNotes = (notes: string, format: string) => simpleTextRequest(`Summarize the following notes in ${format} format:\n\n${notes}`);
-export const generateFlashcards = (topic: string, numCards: number) => simpleTextRequest(`Generate ${numCards} flashcards for the topic "${topic}". For each flashcard, provide a "front" (a question or term) and a "back" (the answer or definition). Format the output as a numbered list.`);
-export const getMentorshipAdvice = (studentData: string) => simpleTextRequest(`You are an AI progress mentor. Based on the student's data below, provide encouraging advice on how they can improve. Highlight their strengths and suggest 2-3 specific, actionable steps for their areas of improvement.\n\nData:\n${studentData}`);
-export const analyzeExamPrep = (prepData: string) => simpleTextRequest(`Generate a customized exam preparation plan for a student based on their self-assessment below. The plan should suggest how to balance revision of strong topics with focused effort on weak topics.\n\nStudent's Input:\n${prepData}`);
-export const generateLearningPath = (studentProfile: string) => simpleTextRequest(`Create a personalized learning path for a student with the following profile. The path should suggest topics to study in a logical order and include different types of learning resources (e.g., reading, videos, practical exercises).\n\nStudent Profile:\n${studentProfile}`, 'complex');
+};
 
+export const summarizeNotes = (notes: string, format: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Summarize the following notes in ${format} format:\n\n${notes}`);
+};
+
+export const generateFlashcards = (topic: string, numCards: number) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Generate ${numCards} flashcards for the topic "${topic}". For each flashcard, provide a "front" (a question or term) and a "back" (the answer or definition). Format the output as a numbered list.`);
+};
+
+export const getMentorshipAdvice = (studentData: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`You are an AI progress mentor. Based on the student's data below, provide encouraging advice on how they can improve. Highlight their strengths and suggest 2-3 specific, actionable steps for their areas of improvement.\n\nData:\n${studentData}`);
+};
+
+export const analyzeExamPrep = (prepData: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Generate a customized exam preparation plan for a student based on their self-assessment below. The plan should suggest how to balance revision of strong topics with focused effort on weak topics.\n\nStudent's Input:\n${prepData}`);
+};
+
+export const generateLearningPath = (studentProfile: string) => {
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return Promise.resolve("AI features are currently unavailable. Please contact the administrator.");
+    }
+    return simpleTextRequest(`Create a personalized learning path for a student with the following profile. The path should suggest topics to study in a logical order and include different types of learning resources (e.g., reading, videos, practical exercises).\n\nStudent Profile:\n${studentProfile}`, 'complex');
+};
 
 export const analyzeImage = async (base64Data: string, mimeType: string, prompt: string): Promise<string> => {
+    // Check if AI client is initialized
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return "AI features are currently unavailable. Please contact the administrator.";
+    }
+    
     try {
         const imagePart = {
             inlineData: {
@@ -197,6 +315,12 @@ export const generateVideo = async (
     aspectRatio: '16:9' | '9:16', 
     onUpdate: (status: string) => void
 ): Promise<{ uri?: string; error?: string }> => {
+    // Check if AI client is initialized
+    if (!ai) {
+        console.error("AI client is not initialized. Missing API key.");
+        return { error: "AI features are currently unavailable. Please contact the administrator." };
+    }
+    
     try {
         // Create a new GoogleGenAI instance right before making an API call to ensure it always uses the most up-to-date API key from the dialog.
         const videoApiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
