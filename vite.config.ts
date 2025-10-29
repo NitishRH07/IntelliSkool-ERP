@@ -18,6 +18,20 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        // Increase chunk size warning limit to 5MB (default is 500KB)
+        chunkSizeWarningLimit: 5000,
+        // Split vendor chunks to reduce individual chunk sizes
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'react-vendor': ['react', 'react-dom'],
+              'ai-vendor': ['@google/genai'],
+              'chart-vendor': ['recharts']
+            }
+          }
+        }
       }
     };
 });
