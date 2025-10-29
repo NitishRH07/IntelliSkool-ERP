@@ -5,11 +5,11 @@ import { Quiz } from '../types';
 
 // Initialize Gemini AI Client with proper environment variable handling for Vite
 // In Vite, environment variables must be prefixed with VITE_ to be exposed to client-side code
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Add a check for missing API key
 if (!apiKey) {
-    console.warn("Gemini API key is missing. AI features will not work.");
+    console.warn("Gemini API key is missing. AI features will not work. Make sure VITE_GEMINI_API_KEY is set in environment variables.");
 }
 
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -322,8 +322,8 @@ export const generateVideo = async (
     }
     
     try {
-        // Create a new GoogleGenAI instance right before making an API call to ensure it always uses the most up-to-date API key from the dialog.
-        const videoApiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+        // For video generation, we need to use the API key directly
+        const videoApiKey = import.meta.env.VITE_GEMINI_API_KEY;
         const videoAI = new GoogleGenAI({ apiKey: videoApiKey });
         onUpdate('Starting video generation...');
         let operation = await videoAI.models.generateVideos({
