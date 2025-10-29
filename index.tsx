@@ -2,10 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
+// Add comprehensive error logging
+console.log("index.tsx: Script loaded");
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
+  console.error("index.tsx: Could not find root element to mount to");
   throw new Error("Could not find root element to mount to");
 }
+
+console.log("index.tsx: Root element found", rootElement);
 
 // Add error boundary to catch rendering errors
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
@@ -15,16 +21,17 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 
   static getDerivedStateFromError(error: Error) {
-    console.error("Error caught by boundary:", error);
+    console.error("ErrorBoundary: Error caught by boundary:", error);
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error details:", error, errorInfo);
+    console.error("ErrorBoundary: Error details:", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
+      console.log("ErrorBoundary: Rendering error fallback UI");
       return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
@@ -45,7 +52,10 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
+console.log("index.tsx: Creating root");
 const root = ReactDOM.createRoot(rootElement);
+
+console.log("index.tsx: Rendering App component");
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -53,3 +63,5 @@ root.render(
     </ErrorBoundary>
   </React.StrictMode>
 );
+
+console.log("index.tsx: Rendering completed");
