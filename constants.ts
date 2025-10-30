@@ -45,7 +45,6 @@ export const TEACHER_MENU: MenuItem[] = [
             { label: 'Remarks Generator', icon: 'fa-solid fa-feather-pointed', view: 'aiRemarksGen' },
             { label: 'Feedback Generator', icon: 'fa-solid fa-marker', view: 'aiFeedbackGen' },
             { label: 'Paper Evaluator', icon: 'fa-solid fa-file-signature', view: 'aiPaperEvaluator' },
-            { label: 'Video Generator', icon: 'fa-solid fa-video', view: 'videoGenerator' },
             { label: 'Grading Assistant', icon: 'fa-solid fa-file-pen', view: 'aiGradingAssistant' },
             { label: 'Performance Predictor', icon: 'fa-solid fa-chart-line', view: 'aiStudentPredictor' },
         ]
