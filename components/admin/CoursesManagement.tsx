@@ -1,198 +1,188 @@
 import React, { useState } from 'react';
-import Card from '../ui/Card';
 import Button from '../ui/Button';
 
-interface Course {
-  id: string;
-  name: string;
-  code: string;
-  credits: number;
-  department: string;
-  instructor: string;
-  semester: string;
-  status: 'active' | 'inactive';
-}
+// Mock course data
+const mockCourses = [
+    { id: '1', name: 'Mathematics', code: 'MATH101', credits: 3, instructor: 'Dr. Ramanathan', students: 45 },
+    { id: '2', name: 'Physics', code: 'PHYS101', credits: 4, instructor: 'Prof. Lakshmi', students: 42 },
+    { id: '3', name: 'Chemistry', code: 'CHEM101', credits: 4, instructor: 'Dr. Prakash', students: 40 },
+    { id: '4', name: 'Biology', code: 'BIOL101', credits: 3, instructor: 'Dr. Anitha', students: 38 },
+    { id: '5', name: 'English', code: 'ENG101', credits: 2, instructor: 'Prof. Meena', students: 50 },
+];
 
 const CoursesManagement: React.FC = () => {
-  const [courses] = useState<Course[]>([
-    {
-      id: 'C001',
-      name: 'Physics - Laws of Motion',
-      code: 'PHY101',
-      credits: 4,
-      department: 'Science',
-      instructor: 'Dr. Sarah Johnson',
-      semester: 'Spring 2024',
-      status: 'active'
-    },
-    {
-      id: 'C002',
-      name: 'Mathematics - Algebra',
-      code: 'MATH101',
-      credits: 3,
-      department: 'Mathematics',
-      instructor: 'Prof. Michael Chen',
-      semester: 'Spring 2024',
-      status: 'active'
-    },
-    {
-      id: 'C003',
-      name: 'Chemistry - Periodic Table',
-      code: 'CHEM101',
-      credits: 4,
-      department: 'Science',
-      instructor: 'Dr. Emily Wilson',
-      semester: 'Spring 2024',
-      status: 'active'
-    },
-    {
-      id: 'C004',
-      name: 'English Literature',
-      code: 'ENG101',
-      credits: 3,
-      department: 'Humanities',
-      instructor: 'Ms. Jessica Brown',
-      semester: 'Spring 2024',
-      status: 'inactive'
-    }
-  ]);
+    const [courses] = useState(mockCourses);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [newCourse, setNewCourse] = useState({
+        name: '',
+        code: '',
+        credits: 3,
+        instructor: '',
+    });
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState('All');
-  const [filterStatus, setFilterStatus] = useState('All');
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setNewCourse(prev => ({ ...prev, [name]: value }));
+    };
 
-  const departments = ['All', 'Science', 'Mathematics', 'Humanities', 'Arts', 'Commerce'];
-  const statuses = ['All', 'active', 'inactive'];
+    const handleAddCourse = () => {
+        if (newCourse.name && newCourse.code && newCourse.instructor) {
+            // In a real app, you would add the course to the database
+            alert(`Course "${newCourse.name}" added successfully!`);
+            setNewCourse({ name: '', code: '', credits: 3, instructor: '' });
+            setShowAddForm(false);
+        } else {
+            alert('Please fill in all required fields');
+        }
+    };
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.instructor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = filterDepartment === 'All' || course.department === filterDepartment;
-    const matchesStatus = filterStatus === 'All' || course.status === filterStatus;
-    return matchesSearch && matchesDepartment && matchesStatus;
-  });
+    const handleDeleteCourse = (courseId: string, courseName: string) => {
+        // In a real app, you would delete the course from the database
+        if (confirm(`Are you sure you want to delete the course "${courseName}"?`)) {
+            alert(`Course "${courseName}" deleted successfully!`);
+        }
+    };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card title="Courses Management" icon="fa-solid fa-book">
-        <div className="mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <i className="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-              </div>
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                value={filterDepartment}
-                onChange={(e) => setFilterDepartment(e.target.value)}
-              >
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                {statuses.map(status => (
-                  <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
-                ))}
-              </select>
+    return (
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-gray-800">Courses Management</h1>
+                <Button onClick={() => setShowAddForm(true)}>
+                    <i className="fa-solid fa-plus mr-2"></i>
+                    Add Course
+                </Button>
             </div>
-            <Button>
-              <i className="fa-solid fa-plus mr-2"></i> Add New Course
-            </Button>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCourses.map((course) => (
-                <tr key={course.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{course.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.department}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.instructor}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.credits}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.semester}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(course.status)}`}>
-                      {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-primary hover:text-primary-dark mr-3">
-                      Edit
-                    </button>
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                      View
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      {course.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            {showAddForm && (
+                <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add New Course</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Course Name *
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={newCourse.name}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                                placeholder="Enter course name"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Course Code *
+                            </label>
+                            <input
+                                type="text"
+                                name="code"
+                                value={newCourse.code}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                                placeholder="Enter course code"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Credits
+                            </label>
+                            <select
+                                name="credits"
+                                value={newCourse.credits}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            >
+                                {[1, 2, 3, 4, 5, 6].map(num => (
+                                    <option key={num} value={num}>{num}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Instructor *
+                            </label>
+                            <input
+                                type="text"
+                                name="instructor"
+                                value={newCourse.instructor}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                                placeholder="Enter instructor name"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex space-x-3">
+                        <Button onClick={handleAddCourse}>
+                            Add Course
+                        </Button>
+                        <Button variant="secondary" onClick={() => setShowAddForm(false)}>
+                            Cancel
+                        </Button>
+                    </div>
+                </div>
+            )}
 
-        {filteredCourses.length === 0 && (
-          <div className="text-center py-12">
-            <i className="fa-solid fa-book text-4xl text-gray-300 mb-4"></i>
-            <h3 className="text-xl font-medium text-gray-700">No courses found</h3>
-            <p className="text-gray-500 mt-2">Try adjusting your search or filter criteria</p>
-          </div>
-        )}
-
-        <div className="mt-6 flex justify-between items-center">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{filteredCourses.length}</span> of <span className="font-medium">{courses.length}</span> courses
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="secondary" size="sm">
-              Previous
-            </Button>
-            <Button variant="secondary" size="sm">
-              Next
-            </Button>
-          </div>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Course
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Code
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Credits
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Instructor
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Students
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {courses.map((course) => (
+                            <tr key={course.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-medium text-gray-900">{course.name}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-500">{course.code}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-500">{course.credits}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-500">{course.instructor}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-500">{course.students}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button
+                                        onClick={() => handleDeleteCourse(course.id, course.name)}
+                                        className="text-red-600 hover:text-red-900 mr-3"
+                                    >
+                                        <i className="fa-solid fa-trash"></i>
+                                    </button>
+                                    <button className="text-primary hover:text-primary-dark">
+                                        <i className="fa-solid fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </Card>
-    </div>
-  );
+    );
 };
 
 export default CoursesManagement;
